@@ -11,6 +11,8 @@ box_chars = {
     botright = "┛"
 }
 
+test = {}
+
 --wrtie directly to the screen without moveCursor
 function fwrite(x, y, _text, fg, bg)
     local saveFg, saveBg = false
