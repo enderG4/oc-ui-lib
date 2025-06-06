@@ -62,7 +62,7 @@ function baseElement:getHeight() return self.h end
 function baseElement:getForeground() return self.fg end
 function baseElement:getBackground() return self.bg end
 
---doesnt do anything by default, needs to be overriden
+--if overriden it wont inherit TRE logic
 function baseElement:handleEvent(...)
     local name, _, x, y = ...
     if name == "touch" and type(self.TRE) == "string" then

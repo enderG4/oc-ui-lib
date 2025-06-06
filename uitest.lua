@@ -1,6 +1,7 @@
 local component = require("component")
 local gpu = component.gpu
 local term = require("term")
+local sides = require("sides")
 
 package.loaded["ui_lib"] = nil -- for debug !!!
 local ui = require("ui_lib")
@@ -45,14 +46,19 @@ root = ui.splitLayout.new("root", "horizontal", 1)
 reactor1:setTouchReturnEvent("reactor_event")
 reactor4:setTouchReturnEvent("reactor_event")
 
+function reactor_echo(...)
+    local name, _, x, y = ...
+    print(string.format("Received reactor event from %s %s", x, y))
+end
+
+event.listen("reactor_event", reactor_echo)
+event.listen("touch", function(name, address, x, y, player)
+    root:handleEvent(name, address, x, y, player)
+end)
+
 while true do
-    local name, _, x, y = event.pull()
-    if name == "interrupted" then break end
-    if name == "touch" then
-        root:handleEvent(name, _, x, y)
-    elseif name == "reactor_event" then
-        print(string.format("Reactor event detected at %s %s", x, y))
-    end
+    local name = event.pull(0.1)
+    if name == "interrupted" then break end 
 end
 
 --os.sleep(20)
