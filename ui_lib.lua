@@ -1,6 +1,7 @@
 local component = require("component")
 local gpu = component.gpu
 local term = require("term")
+local stru = require("stringutils")
 
 box_chars = {
     hline = "━",
@@ -326,12 +327,26 @@ function label.new(id, _text, fg, bg)
     obj._text = _text or ""
     obj.fg = fg or gpu.getForeground()
     obj.bg = bg or gpu.getBackground()
+    obj:setWidth(0)
+    obj:wrappedText = {}
 
     return obj
 end
 
 function label:setText(_text) self._text = _text end
 function label:getText() return self._text end
+
+--width needs to be set first
+function label:getHeight()
+    if self:getWidth() == 0 or not self:getWidth() then
+        term.clear()
+        print("Width wasnt set for label %s", self.id)
+        error()
+    end
+    self:wrappedText = stru.tableWrap(self:getText(), self:getWidth())
+    self:setHeight(#wrappedText)
+    return self:height
+end
 
 function label:draw()
     --colors
