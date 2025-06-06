@@ -434,11 +434,19 @@ function progressBar:setMin(min) self.min = min end
 function progressBar:getMin() return self.min end
 function progressBar:setMax(max) self.max = max end
 function progressBar:getMax() return self.max end
-function progressBar:setValue(value) self.value = value end
+function progressBar:setValue(value) 
+    if value >= self.min and value <= self.max then
+        self.value = value 
+    else
+        term.clear()
+        print(string.format("Value at progress bar %s is out of bounds", self.id))
+        error()
+    end
+end
 function progressBar:getValue() return self.value end
 function progressBar:incrementValue(i) 
     local i = i or 1
-    self.value = self.value + i
+    self:setValue(self.value + i)
 end
 
 function progressBar:draw()
