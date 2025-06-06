@@ -10,7 +10,11 @@ w, h = gpu.getResolution()
 term.clear()
 
 split1 = ui.splitLayout.new("split1", "vertical")
-    split1:addChild(ui.frame.new("Reactor 1"))
+    reactor1 = ui.linearLayout.new("R1")    
+    reactor_frame = ui.frame.new("Reactor 1", reactor1)
+        reactor1:addChild(ui.label.new(_, "test text"))
+
+    split1:addChild(reactor_frame)
     split1:addChild(ui.frame.new("Reactor 2"))
     split1:addChild(ui.frame.new("Reactor 3"))
 split2 = splitLayout.new("split2", "vertical")

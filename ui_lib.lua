@@ -137,6 +137,7 @@ function linearLayout:draw()
     -- check space
     local totalHeight = (count - 1) * gap
     for _, child in ipairs(self.children) do
+        child:setWidth(w) --set width needs to be before getheight
         totalHeight = totalHeight + child:getHeight()
     end
 
@@ -150,7 +151,6 @@ function linearLayout:draw()
     for _, child in ipairs(self.children) do
         child:setX(x)
         child:setY(y)
-        child:setWidth(w)
         child:draw()
 
         y = y + child:getHeight() + gap
@@ -358,7 +358,14 @@ function label:draw()
     local y = self:getY()
 
     local _text = self:getText()
-    fwrite(x, y, _text, fg, bg)
+    if false then
+    for i, line in ipairs(self:wrappedText) do
+        print(string.format("Size: %d", #self:wrappedText))
+        error()
+
+        print(x, y, line, fg, bg)
+        y = y + 1
+    end end
 end
 
 return {
