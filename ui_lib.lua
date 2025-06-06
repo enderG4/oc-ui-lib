@@ -12,8 +12,6 @@ box_chars = {
     botright = "┛"
 }
 
-test = {}
-
 --wrtie directly to the screen without moveCursor
 function fwrite(x, y, _text, fg, bg)
     local saveFg, saveBg = false
@@ -143,7 +141,7 @@ function linearLayout:draw()
 
     if totalHeight > h then
         term.clear()
-        print(string.format("Not enough space in layout %s! Needed %d, got %d", self.id, totalHeight, h))
+        print(string.format("Not enough height in layout %s! Needed %d, got %d", self.id, totalHeight, h))
         error()
     end
 
@@ -321,14 +319,14 @@ label = setmetatable({}, baseElement)
 label.__index = label
 
 --should only be used in linear layout
-function label.new(id, _text, fg, bg)
+function label.new(id, _text, centered, fg, bg)
     local obj = setmetatable({}, label)
     obj.id = id or nil
+    obj.centered = centered or 0
     obj._text = _text or ""
     obj.fg = fg or gpu.getForeground()
     obj.bg = bg or gpu.getBackground()
-    obj:setWidth(0)
-    obj:wrappedText = {}
+    obj.wrappedText = {}
 
     return obj
 end
@@ -338,14 +336,15 @@ function label:getText() return self._text end
 
 --width needs to be set first
 function label:getHeight()
-    if self:getWidth() == 0 or not self:getWidth() then
+    local width = self:getWidth()
+    if not width then
         term.clear()
-        print("Width wasnt set for label %s", self.id)
+        print(string.format("Width wasnt set for label %s", self.id))
         error()
     end
-    self:wrappedText = stru.tableWrap(self:getText(), self:getWidth())
-    self:setHeight(#wrappedText)
-    return self:height
+    self.wrappedText = stru.tableWrap(self:getText(), width)
+    self:setHeight(#(self.wrappedText))
+    return self.h
 end
 
 function label:draw()
@@ -356,16 +355,16 @@ function label:draw()
     --coordinates
     local x = self:getX()
     local y = self:getY()
+    local w = self:getWidth()
 
     local _text = self:getText()
-    if false then
-    for i, line in ipairs(self:wrappedText) do
-        print(string.format("Size: %d", #self:wrappedText))
-        error()
-
-        print(x, y, line, fg, bg)
+    for i, line in ipairs(self.wrappedText) do
+        if self.centered then
+            local d = (w - string.len(line)) // 2
+            fwrite(x + d, y, line, fg, bg)
+        end
         y = y + 1
-    end end
+    end
 end
 
 return {
