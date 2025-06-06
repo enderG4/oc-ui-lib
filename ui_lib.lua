@@ -366,6 +366,21 @@ function label:draw()
     end
 end
 
+space = setmetatable({}, baseElement)
+space.__index = space
+
+function space.new(id, height)
+    local obj = setmetatable({}, space)
+    obj.id = id or nil
+    obj.h = height or 1
+
+    return obj
+end
+
+function space:draw()
+    --the function doesnt do anything :))
+end
+
 return {
     fwrite = fwrite,
     baseElement = baseElement,
@@ -374,4 +389,5 @@ return {
     splitLayout = splitLayout,
     frame = frame,
     label = label,
+    space = space,
 }

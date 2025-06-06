@@ -13,6 +13,7 @@ term.clear()
 split1 = ui.splitLayout.new("split1", "vertical")
     reactor1 = ui.linearLayout.new("R1")    
     reactor_frame = ui.frame.new("Reactor 1", reactor1)
+        reactor1:addChild(ui.space.new(_, 1))
         reactor1:addChild(ui.label.new(_, "Reactor 1 has no problems so far", true))
 
     split1:addChild(reactor_frame)
