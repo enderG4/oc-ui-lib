@@ -14,8 +14,8 @@ box_chars = {
 
 --wrtie directly to the screen without moveCursor
 function fwrite(x, y, _text, fg, bg)
-    local saveFg, saveBg = false
-    local oldFg, oldBg = nil
+    local saveFg, saveBg = false, false
+    local oldFg, oldBg = nil, nil
     if fg then
         oldFg = gpu.getForeground()
         gpu.setForeground(fg)
@@ -281,26 +281,29 @@ function frame:draw()
     local right = x + w - 1
     local bottom = y + h - 1
 
+    --!top border is drawn like this to avoid flikering, if i end up making a screen buffer this is useless but whatever
     --top border
-    fwrite(x, y, box_chars.topleft, fg, bg)                 -- Top-left corner
-    fwrite(x + 1, y, string.rep(box_chars.hline, w - 2), fg, bg)  -- Top line
-    fwrite(right, y, box_chars.topright, fg, bg)             -- Top-right corner
+    fwrite(x, y, box_chars.topleft .. box_chars.hline, fg, bg)
+    --title
+    local titleSize = 0
+    if(string.len(self.id) < w - 3) then
+        local title = self.id
+        titleSize = string.len(self.id)
+        fwrite(x + 2, y, title, fg, bg)
+    end
+    --top border continue
+    fwrite(x + titleSize, y, string.rep(box_chars.hline, w - 1 - titleSize), fg, bg)
+    fwrite(right, y, box_chars.topright, fg, bg)
 
     --bottom border
-    fwrite(x, bottom, box_chars.botleft, fg, bg)                 -- Bottom-left corner
-    fwrite(x + 1, bottom, string.rep(box_chars.hline, w - 2), fg, bg)  -- Bottom line
-    fwrite(right, bottom, box_chars.botright, fg, bg)            -- Bottom-right corner
+    fwrite(x, bottom, box_chars.botleft, fg, bg)
+    fwrite(x + 1, bottom, string.rep(box_chars.hline, w - 2), fg, bg)
+    fwrite(right, bottom, box_chars.botright, fg, bg)
 
     --vlines
     for i = y + 1, bottom - 1 do
-        fwrite(x, i, box_chars.vline, fg, bg)      -- Left side
-        fwrite(right, i, box_chars.vline, fg, bg)  -- Right side
-    end
-
-    --title
-    if(string.len(self.id) < w - 3) then
-        local title = self.id
-        fwrite(x + 2, y, title, fg, bg)
+        fwrite(x, i, box_chars.vline, fg, bg)
+        fwrite(right, i, box_chars.vline, fg, bg)
     end
 
     --draw base
@@ -381,6 +384,57 @@ function space:draw()
     --the function doesnt do anything :))
 end
 
+progressBar = setmetatable({}, baseElement)
+progressBar.__index = progressBar
+
+function progressBar.new(id, min, max, fg, bg)
+    local obj = setmetatable({}, progressBar)
+    obj.id = id
+    obj.fg = fg or gpu.getForeground()
+    obj.bg = bg or 0x505050
+    obj.min = min or 0
+    obj.max = max or 100
+    obj.value = 0
+
+    return obj
+end
+
+function progressBar:setMin(min) self.min = min end
+function progressBar:getMin() return self.min end
+function progressBar:setMax(max) self.max = max end
+function progressBar:getMax() return self.max end
+function progressBar:setValue(value) self.value = value end
+function progressBar:getValue() return self.value end
+function progressBar:incrementValue(i) 
+    local i = i or 1
+    self.value = self.value + i
+end
+
+function progressBar:draw()
+    --colors
+    local fg = self:getForeground() --here fg is full block color
+    local bg = self:getBackground() --and bg is empty block color
+
+    --coordinates
+    local x = self:getX()
+    local y = self:getY()
+    local w = self:getWidth()
+    local h = self:getHeight()
+
+    --bar parameters
+    local min = self:getMin()
+    local max = self:getMax()
+    local value = self:getValue()
+
+    local full = math.floor((value - min) / (max - min) * w)
+    local empty = w - full
+
+    for i = y, y + h - 1 do
+        fwrite(x, i, string.rep(" ", full), _, fg)
+        fwrite(x + full, i, string.rep(" ", empty), _, bg)
+    end
+end
+
 return {
     fwrite = fwrite,
     baseElement = baseElement,
@@ -390,4 +444,5 @@ return {
     frame = frame,
     label = label,
     space = space,
+    progressBar = progressBar,
 }
