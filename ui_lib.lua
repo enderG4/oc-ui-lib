@@ -322,7 +322,7 @@ label.__index = label
 function label.new(id, _text, centered, fg, bg)
     local obj = setmetatable({}, label)
     obj.id = id or nil
-    obj.centered = centered or 0
+    obj.centered = centered or false
     obj._text = _text or ""
     obj.fg = fg or gpu.getForeground()
     obj.bg = bg or gpu.getBackground()
@@ -359,10 +359,9 @@ function label:draw()
 
     local _text = self:getText()
     for i, line in ipairs(self.wrappedText) do
-        if self.centered then
-            local d = (w - string.len(line)) // 2
-            fwrite(x + d, y, line, fg, bg)
-        end
+        local d = 0
+        if self.centered then d = (w - string.len(line)) // 2 end
+        fwrite(x + d, y, line, fg, bg)
         y = y + 1
     end
 end
