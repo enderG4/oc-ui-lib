@@ -61,6 +61,14 @@ function baseElement:getHeight() return self.h end
 function baseElement:getForeground() return self.fg end
 function baseElement:getBackground() return self.bg end
 
+--doesnt do anything by default, needs to be overriden
+function baseElement:handleEvent(...) end
+
+function baseElement:collide(x, y)
+    return x >= self.x and x <= self.x + self.w and
+           y >= self.y and y <= self.y + self.h
+end
+
 --container element class - baseElement with childrens table
 containerElement = setmetatable({}, baseElement)
 containerElement.__index = containerElement
@@ -100,6 +108,21 @@ function containerElement:clearChildren()
     for i, child in ipairs(self.children) do
         self.children[i] = nil
     end
+end
+
+function containerElement:propagateEvent(...)
+    local name, _, x, y = ...
+    if name == "touch" then
+        for i, child in ipairs(self.children) do
+            if child:collide(x, y) then 
+                child:handleEvent(...) 
+            end
+        end
+    end
+end
+
+function containerElement:handleEvent(...)
+    self:propagateEvent(...)
 end
 
 linearLayout = setmetatable({}, containerElement)
@@ -294,7 +317,7 @@ function frame:draw()
         fwrite(x + 2, y, title, fg, bg)
     end
     --top border continue
-    fwrite(x + titleSize, y, string.rep(box_chars.hline, w - 1 - titleSize), fg, bg)
+    fwrite(x + titleSize + 2, y, string.rep(box_chars.hline, w - 3 - titleSize), fg, bg)
     fwrite(right, y, box_chars.topright, fg, bg)
 
     --bottom border
@@ -319,6 +342,12 @@ function frame:draw()
         base:draw()
     end
 end
+
+function frame:handleEvent()
+    if self.base then
+        self.base:handleEvent()
+    end
+end 
 
 label = setmetatable({}, baseElement)
 label.__index = label

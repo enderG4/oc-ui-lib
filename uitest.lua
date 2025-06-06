@@ -23,7 +23,7 @@ split1 = ui.splitLayout.new("split1", "vertical")
     split1:addChild(reactor_frame)
     split1:addChild(ui.frame.new("Reactor 2"))
     split1:addChild(ui.frame.new("Reactor 3", _, 0xbf8d04))
-split2 = splitLayout.new("split2", "vertical")
+split2 = ui.splitLayout.new("split2", "vertical")
     reactor4 = ui.linearLayout.new("R4")
     pb_r4 = ui.progressBar.new(_, 0, 100, 0x04bf52)
         reactor4:addChild(ui.space.new())
@@ -42,9 +42,17 @@ root = ui.splitLayout.new("root", "horizontal", 1)
     root:setHeight(h)
     root:draw()
 
+function reactor1:handleEvent(...)
+    print("Touch event at reactor 1 detected!")
+    
+end
+
 while true do
     local name, _, x, y = event.pull()
     if name == "interrupted" then break end
+    if name == "touch" then
+        root:handleEvent(name, _, x, y)
+    end
 end
 
 --os.sleep(20)
