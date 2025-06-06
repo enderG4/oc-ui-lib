@@ -45,7 +45,9 @@ function baseElement.new(id)
     return obj
 end
 
-function baseElement:setX(x) self.x = x end
+function baseElement:setX(x)
+    self.x = x
+end
 function baseElement:setY(y) self.y = y end
 function baseElement:setWidth(w) self.w = w end
 function baseElement:setHeight(h) self.h = h end

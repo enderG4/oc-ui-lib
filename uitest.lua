@@ -4,10 +4,15 @@ local term = require("term")
 
 package.loaded["ui_lib"] = nil -- for debug !!!
 local ui = require("ui_lib")
+local event = require("event")
 
 --main code
-gpu.setResolution(50,18)
+gpu.setResolution(57,18)
 w, h = gpu.getResolution()
+
+--gpu.setForeground(0x000000)
+--gpu.setBackground(0xFFFFFF)
+
 term.clear()
 
 split1 = ui.splitLayout.new("split1", "vertical")
@@ -20,25 +25,26 @@ split1 = ui.splitLayout.new("split1", "vertical")
     split1:addChild(ui.frame.new("Reactor 3", _, 0xbf8d04))
 split2 = splitLayout.new("split2", "vertical")
     reactor4 = ui.linearLayout.new("R4")
-    pb_r4 = ui.progressBar.new(_, 0, 100)
+    pb_r4 = ui.progressBar.new(_, 0, 100, 0x04bf52)
+        reactor4:addChild(ui.space.new())
         reactor4:addChild(ui.label.new(_, "Progress bar:"))
         reactor4:addChild(pb_r4)
     split2:addChild(ui.frame.new("Reactor 4", reactor4))
     split2:addChild(ui.frame.new("Reactor 5"))
     split2:addChild(ui.frame.new("Reactor 6", _, 0xAA336A))
 
-root = ui.splitLayout.new("root", "horizontal")
+root = ui.splitLayout.new("root", "horizontal", 1)
     root:addChild(split1)
     root:addChild(split2)
     root:setX(1)
     root:setY(1)
     root:setWidth(w)
     root:setHeight(h)
-
-for v = 0, 10 do
     root:draw()
-    os.sleep(0.2)
-    pb_r4:incrementValue(10)
+
+while true do
+    local name, _, x, y = event.pull()
+    if name == "interrupted" then break end
 end
 
 --os.sleep(20)
