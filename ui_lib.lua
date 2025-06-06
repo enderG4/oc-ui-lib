@@ -292,7 +292,7 @@ function frame:draw()
         fwrite(x + 2, y, title, fg, bg)
     end
     --top border continue
-    fwrite(x + titleSize + 2, y, string.rep(box_chars.hline, w - 3 - titleSize), fg, bg)
+    fwrite(x + titleSize, y, string.rep(box_chars.hline, w - 1 - titleSize), fg, bg)
     fwrite(right, y, box_chars.topright, fg, bg)
 
     --bottom border
