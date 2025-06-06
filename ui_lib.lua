@@ -2,6 +2,7 @@ local component = require("component")
 local gpu = component.gpu
 local term = require("term")
 local stru = require("stringutils")
+local event = require("event")
 
 box_chars = {
     hline = "━",
@@ -13,7 +14,7 @@ box_chars = {
 }
 
 --wrtie directly to the screen without moveCursor
-function fwrite(x, y, _text, fg, bg)
+function fwrite(x, y, _text, fg, bg, TRE) --TRE = touch return event
     local saveFg, saveBg = false, false
     local oldFg, oldBg = nil, nil
     if fg then
@@ -62,11 +63,22 @@ function baseElement:getForeground() return self.fg end
 function baseElement:getBackground() return self.bg end
 
 --doesnt do anything by default, needs to be overriden
-function baseElement:handleEvent(...) end
+function baseElement:handleEvent(...)
+    local name, _, x, y = ...
+    if name == "touch" and type(self.TRE) == "string" then
+        event.push(self.TRE, self.id, x, y)
+    end
+end
 
 function baseElement:collide(x, y)
     return x >= self.x and x <= self.x + self.w and
            y >= self.y and y <= self.y + self.h
+end
+
+function baseElement:setTouchReturnEvent(name)
+    if type(name) == "string" then
+        self.TRE = name
+    end
 end
 
 --container element class - baseElement with childrens table
@@ -122,6 +134,10 @@ function containerElement:propagateEvent(...)
 end
 
 function containerElement:handleEvent(...)
+    local name, _, x, y = ...
+    if name == "touch" and type(self.TRE) == "string" then
+        event.push(self.TRE, self.id, x, y)
+    end
     self:propagateEvent(...)
 end
 
@@ -343,9 +359,9 @@ function frame:draw()
     end
 end
 
-function frame:handleEvent()
+function frame:handleEvent(...)
     if self.base then
-        self.base:handleEvent()
+        self.base:handleEvent(...)
     end
 end 
 

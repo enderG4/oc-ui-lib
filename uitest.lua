@@ -42,16 +42,16 @@ root = ui.splitLayout.new("root", "horizontal", 1)
     root:setHeight(h)
     root:draw()
 
-function reactor1:handleEvent(...)
-    print("Touch event at reactor 1 detected!")
-    
-end
+reactor1:setTouchReturnEvent("reactor_event")
+reactor4:setTouchReturnEvent("reactor_event")
 
 while true do
     local name, _, x, y = event.pull()
     if name == "interrupted" then break end
     if name == "touch" then
         root:handleEvent(name, _, x, y)
+    elseif name == "reactor_event" then
+        print(string.format("Reactor event detected at %s %s", x, y))
     end
 end
 
