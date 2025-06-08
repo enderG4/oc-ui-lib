@@ -1,8 +1,21 @@
+--- OpenComputers Minimal UI Library.  
+--- Provides UI elements like buttons, labels, and layouts.  
+--- @module oc-ui-lib
+--- @author enderG4
+--- @license MIT  
+
 local component = require("component")
 local gpu = component.gpu
 local term = require("term")
 local stru = require("stringutils")
 local event = require("event")
+
+--errors in oc are trash, you dont need error stack just specify the id where the error takes place
+function print_error(_text)
+    term.clear()
+    print(_text)
+    os.exit(1)
+end
 
 box_chars = {
     hline = "━",
@@ -37,7 +50,7 @@ function fwrite(x, y, _text, fg, bg, TRE) --TRE = touch return event
 end
 
 --baseElement class - abstract, has basic fields
-baseElement = {id, x=1, y=1, w=1, h=1, fg, bg}
+baseElement = {id, x=1, y=1, w=1, h=1, fg, bg, TRE}
 baseElement.__index = baseElement
 
 function baseElement.new(id)
@@ -61,8 +74,9 @@ function baseElement:getWidth() return self.w end
 function baseElement:getHeight() return self.h end
 function baseElement:getForeground() return self.fg end
 function baseElement:getBackground() return self.bg end
+function baseElement:getId() return self.id end
 
---if overriden it wont inherit TRE logic
+--doesnt do anything by default, needs to be overriden
 function baseElement:handleEvent(...)
     local name, _, x, y = ...
     if name == "touch" and type(self.TRE) == "string" then
@@ -71,14 +85,18 @@ function baseElement:handleEvent(...)
 end
 
 function baseElement:collide(x, y)
-    return x >= self.x and x <= self.x + self.w and
-           y >= self.y and y <= self.y + self.h
+    return x >= self.x and x <= self.x + self.w - 1 and
+        y >= self.y and y <= self.y + self.h - 1
 end
 
 function baseElement:setTouchReturnEvent(name)
     if type(name) == "string" then
         self.TRE = name
     end
+end
+
+function baseElement:measureHeight(w)
+    return self.h
 end
 
 --container element class - baseElement with childrens table
@@ -174,28 +192,35 @@ function linearLayout:draw()
     local h = self:getHeight()
 
     -- check space
-    local totalHeight = (count - 1) * gap
-    for _, child in ipairs(self.children) do
-        child:setWidth(w) --set width needs to be before getheight
-        totalHeight = totalHeight + child:getHeight()
-    end
+    local totalHeight = self:measureHeight(w)
 
-    if totalHeight > h then
-        term.clear()
-        print(string.format("Not enough height in layout %s! Needed %d, got %d", self.id, totalHeight, h))
-        error()
+    if totalHeight > h then 
+        print_error(string.format("Not enough height in layout %s! Needed %d, got %d", self.id, totalHeight, h))
     end
 
     -- draw
     for _, child in ipairs(self.children) do
         child:setX(x)
         child:setY(y)
+        child:setHeight(child:measureHeight(w))
+        child:setWidth(w)
         child:draw()
 
         y = y + child:getHeight() + gap
     end
 end
 
+function linearLayout:measureHeight(w)
+    local count = #self.children
+    if count == 0 then return 0 end
+    local totalHeight = (count - 1) * self.gap
+    for i, child in ipairs(self.children) do
+        totalHeight = totalHeight + child:measureHeight(w)
+    end
+
+    --print(totalHeight)
+    return totalHeight
+end
 
 splitLayout = setmetatable({}, containerElement)
 splitLayout.__index = splitLayout
@@ -207,9 +232,7 @@ function splitLayout.new(id, mode, gap)
     setmetatable(obj, splitLayout)
 
     if not mode then 
-        term.clear()
-        print(string.format("Mode for %s wasnt specified!", id))
-        error()
+        print_error(string.format("Mode for %s wasnt specified!", id))
      end
     obj.mode = mode
     obj.gap = gap
@@ -220,7 +243,7 @@ end
 function splitLayout:getGap() return self.gap end
 function splitLayout:setGap(gap) self.gap = gap end
 function splitLayout:getMode() return self.mode end
-function splitLayout:setMode(gap) self.mode = gap end
+function splitLayout:setMode(mode) self.mode = mode end
 
 function splitLayout:draw()
     --parameters
@@ -281,13 +304,64 @@ function splitLayout:draw()
         end
 
     else
-        term.clear()
-        print(string.format("Invalid mode for layout %s!", self.id)) 
-        error()
+        print_error(string.format("Invalid mode for layout %s!", self.id))
     end
 end
 
-frame = setmetatable({}, baseElement)
+--abstract class to hold only one element
+singleElementContainer = setmetatable({}, baseElement)
+singleElementContainer.__index = singleElementContainer
+
+singleElementContainer.base = nil
+
+-- :P
+function singleElementContainer:setBase(base) 
+    if type(base) ~= "table" then return end
+    if not self.id and type(base.id) == "string" then
+        self.id = base.id
+    end
+    self.base = base
+end
+function singleElementContainer:removeBase()
+    self.base = nil
+end
+function singleElementContainer:getBase() return self.base end
+function singleElementContainer:handleEvent(...)
+    local _, _, x, y = ...
+    if self.base then
+        if self.base:collide(x, y) then self.base:handleEvent(...) end
+    end
+end
+function singleElementContainer:isBaseContainer()
+    if not self.base then return false end
+    if not self.base.children then return false end
+    return true
+end
+function singleElementContainer:addChild(child)
+    if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
+    self.base:addChild(child)
+end
+function singleElementContainer:removeChild(id)
+    if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
+    self.base:removeChild(id)
+end
+function singleElementContainer:findChild(id)
+    if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
+    return self.base:findChild(id)
+end
+function singleElementContainer:getChildren()
+    if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
+    return self.base:getChildren()
+end
+function singleElementContainer:clearChildren()
+    if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
+    self.base:clearChildren()
+end
+
+--SEC doesnt get a measureHeight override but the classes that derive from it should have one
+--not always tho for example frame also doent need one
+
+frame = setmetatable({}, singleElementContainer)
 frame.__index = frame
 
 --object that holds a base, draws a frame around it and them draws the base
@@ -300,13 +374,10 @@ function frame.new(id, base, fg, bg)
     obj.id = id
     obj:setForeground(fg)
     obj:setBackground(bg)
-    obj.base = base
+    obj:setBase(base)
 
     return obj
 end
-
-function frame:setBase(base) self.base = base end
-function frame:getBase() return self.base end
 
 function frame:draw()
     --base and colors
@@ -327,7 +398,7 @@ function frame:draw()
     fwrite(x, y, box_chars.topleft .. box_chars.hline, fg, bg)
     --title
     local titleSize = 0
-    if(string.len(self.id) < w - 3) then
+    if(type(self.id) == "string" and string.len(self.id) < w - 3) then
         local title = self.id
         titleSize = string.len(self.id)
         fwrite(x + 2, y, title, fg, bg)
@@ -359,16 +430,11 @@ function frame:draw()
     end
 end
 
-function frame:handleEvent(...)
-    if self.base then
-        self.base:handleEvent(...)
-    end
-end 
-
 label = setmetatable({}, baseElement)
 label.__index = label
 
 --should only be used in linear layout
+-- to do: add a textChanged flag so that i dont recalculate wrappedText everytime
 function label.new(id, _text, centered, fg, bg)
     local obj = setmetatable({}, label)
     obj.id = id or nil
@@ -377,24 +443,36 @@ function label.new(id, _text, centered, fg, bg)
     obj.fg = fg or gpu.getForeground()
     obj.bg = bg or gpu.getBackground()
     obj.wrappedText = {}
+    obj.textChanged = false
+    if #obj._text ~= 0 then obj.textChanged = true end
 
     return obj
 end
 
-function label:setText(_text) self._text = _text end
+function label:setText(_text) 
+    self._text = _text 
+    self.textChanged = true
+end
 function label:getText() return self._text end
 
 --width needs to be set first
-function label:getHeight()
-    local width = self:getWidth()
-    if not width then
-        term.clear()
-        print(string.format("Width wasnt set for label %s", self.id))
-        error()
+--this shouldnt be use anymore because i added measureHeight logic
+--function label:getHeight()
+--    local width = self:getWidth()
+--    if not width then
+--        string.format("Width wasnt set for label %s", self.id)
+--    end
+--    self.wrappedText = stru.tableWrap(self:getText(), width)
+--    self:setHeight(#(self.wrappedText))
+--    return self.h
+--end
+
+function label:measureHeight(w)
+    if self.textChanged then
+        self.wrappedText = stru.tableWrap(self._text, w) --recalculate wrappedText bc maybe the text changes since last time
+        self.textChanged = false
     end
-    self.wrappedText = stru.tableWrap(self:getText(), width)
-    self:setHeight(#(self.wrappedText))
-    return self.h
+    return #self.wrappedText
 end
 
 function label:draw()
@@ -411,7 +489,8 @@ function label:draw()
     for i, line in ipairs(self.wrappedText) do
         local d = 0
         if self.centered then d = (w - string.len(line)) // 2 end
-        fwrite(x + d, y, line, fg, bg)
+        local paddedText = string.rep(" ", d) .. line .. string.rep(" ", w - (#line + d))
+        fwrite(x, y, paddedText, fg, bg)
         y = y + 1
     end
 end
@@ -454,9 +533,7 @@ function progressBar:setValue(value)
     if value >= self.min and value <= self.max then
         self.value = value 
     else
-        term.clear()
-        print(string.format("Value at progress bar %s is out of bounds", self.id))
-        error()
+        print_error(string.format("Value at progress bar %s is out of bounds", self.id))
     end
 end
 function progressBar:getValue() return self.value end
@@ -490,14 +567,160 @@ function progressBar:draw()
     end
 end
 
+hSpacer = setmetatable({}, singleElementContainer)
+hSpacer.__index = hSpacer
+
+--class that adds horizontal space to an object
+function hSpacer.new(id, spacing, base)
+    local fg = fg or gpu.getForeground()
+    local bg = bg or gpu.getBackground()
+
+    local obj = setmetatable({}, hSpacer)
+    obj.id = id or ""
+    obj.spacing = spacing or 0
+
+    obj:setForeground(fg)
+    obj:setBackground(bg)
+    obj:setBase(base)
+
+    return obj
+end
+
+function hSpacer:setSpacing(value) self.spacing = value end
+function hSpacer:getSpacing() return self.spacing end
+
+function hSpacer:draw()
+    --base and colors
+    local base = self:getBase()
+    local spacing = self:getSpacing()
+    local fg = self:getForeground()
+    local bg = self:getBackground()
+    
+    --coordinates
+    local x = self:getX()
+    local y = self:getY()
+    local w = self:getWidth()
+    local h = self:getHeight()
+    local right = x + w - 1
+    local bottom = y + h - 1
+
+    --draw base
+    if base then
+        base:setX(x + spacing)
+        base:setY(y)
+        base:setWidth(w - spacing * 2)
+        base:setHeight(h)
+        base:setForeground(fg)
+        base:setBackground(bg)
+        base:draw()
+    end
+end
+
+function hSpacer:measureHeight(w)
+    return self.base:measureHeight(w)
+end
+
+button = setmetatable({}, label)
+button.__index = button
+
+--when you press the button a touch return event that you specify will be pushed into the queue
+function button.new(id, h, _text, centered, _event, textColor, buttonColor)
+    if centered == nil then centered = true end
+
+    local obj = label.new(id, _text, centered, textColor, buttonColor)
+    setmetatable(obj, button)
+    obj:setHeight(h)
+
+    --they are swapped on purpose
+    obj.fg = textColor or gpu.getBackground()
+    obj.bg = buttonColor or gpu.getForeground()
+
+    obj:setTouchReturnEvent(_event)
+
+    return obj
+end
+
+function button:measureHeight(w)
+    local h = self.h
+    if self.textChanged then
+        self.wrappedText = stru.tableWrap(self._text, w) --recalculate wrappedText bc maybe the text changes since last time
+        self.textChanged = false
+    end
+    if not h then h = #self.wrappedText
+    elseif #self.wrappedText > h then print_error(string.format("Specified height for button %s is too small for the given text", self.id)) end
+    return h
+end
+
+function button:draw()
+    --colors
+    local fg = self:getForeground()
+    local bg = self:getBackground()
+    
+    --coordinates
+    local x = self:getX()
+    local y = self:getY()
+    local w = self:getWidth()
+    local h = self:getHeight()
+    local botEmpty = (h - #self.wrappedText) // 2
+    local topEmpty = h - #self.wrappedText - botEmpty
+
+    for i = y, y + topEmpty - 1 do fwrite(x, i, string.rep(" ", w), fg, bg) end
+
+    y = y + topEmpty
+    for i, line in ipairs(self.wrappedText) do
+        local d = 0
+        if self.centered then d = (w - string.len(line)) // 2 end
+        local paddedText = string.rep(" ", d) .. line .. string.rep(" ", w - (#line + d))
+        fwrite(x, y, paddedText, fg, bg)
+        y = y + 1
+    end
+
+    for i = y, y + botEmpty - 1 do fwrite(x, i, string.rep(" ", w), fg, bg) end
+end
+
+local local_root = nil
+
+function rootEventWrapper(...)
+    root:handleEvent(...)
+end
+
+function screenInit(root)
+    if not root then print_error("You need to specify a root object") end
+
+    local_root = root
+    local w, h = gpu.getResolution()
+    root:setX(1)
+    root:setY(1)
+    root:setWidth(w)
+    root:setHeight(h)
+
+    event.listen("touch", rootEventWrapper)
+end
+
+function screenClean()
+    term.clear()
+    event.ignore("touch", rootEventWrapper)
+    rootEventWrapper = function() return false end
+end
+
+function screenDraw()
+    root:draw()
+end
+
 return {
     fwrite = fwrite,
     baseElement = baseElement,
     containerElement = containerElement,
     linearLayout = linearLayout,
     splitLayout = splitLayout,
+    singleElementContainer = singleElementContainer,
     frame = frame,
     label = label,
     space = space,
     progressBar = progressBar,
+    hSpacer = hSpacer,
+    button = button,
+    screenInit = screenInit,
+    screenClean = screenClean,
+    screenDraw = screenDraw,
 }
