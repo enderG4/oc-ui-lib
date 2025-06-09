@@ -796,8 +796,6 @@ function hSpacer:draw()
         base:setY(y)
         base:setWidth(w - spacing * 2)
         base:setHeight(h)
-        base:setForeground(fg)
-        base:setBackground(bg)
         base:draw()
     end
 end
