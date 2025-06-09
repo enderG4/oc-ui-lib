@@ -910,14 +910,21 @@ function screen:functionWrapper()
 end
 
 --- Initiates the screen, sets position and size for the root element and set the "touch" event listener
-function screen:init()
+--- @param w number Width
+--- @param h number Height
+function screen:init(w, h)
     if not self.root then print_error("You need to specify a root object") end
 
-    local w, h = gpu.getResolution()
-    root:setX(1)
-    root:setY(1)
-    root:setWidth(w)
-    root:setHeight(h)
+    if not w or not h then
+        w, h = gpu.getResolution() 
+    else
+        gpu.setResolution(w, h)
+    end
+    
+    self.root:setX(1)
+    self.root:setY(1)
+    self.root:setWidth(w)
+    self.root:setHeight(h)
 
     self.touchHandler = self:functionWrapper()
     event.listen("touch", self.touchHandler)
