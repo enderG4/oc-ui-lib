@@ -3,20 +3,20 @@ local gpu = component.gpu
 local term = require("term")
 local sides = require("sides")
 
-package.loaded["ui_lib"] = nil -- for debug !!!
-local ui = require("ui_lib")
+package.loaded["uilib"] = nil
+local ui = require("uilib")
 local event = require("event")
 
 --main code
 gpu.setResolution(57,18)
-w, h = gpu.getResolution()
+local w, h = gpu.getResolution()
 
 --gpu.setForeground(0x000000)
 --gpu.setBackground(0xFFFFFF)
 
-term.clear()
+--term.clear()
 
-split1 = ui.splitLayout.new("split1", "vertical")
+local split1 = ui.splitLayout.new("split1", "vertical")
     reactor1 = ui.linearLayout.new("R1")    
     reactor_frame = ui.frame.new("Reactor 1", reactor1)
         reactor1:addChild(ui.space.new())
@@ -24,7 +24,7 @@ split1 = ui.splitLayout.new("split1", "vertical")
     split1:addChild(reactor_frame)
     split1:addChild(ui.frame.new("Reactor 2"))
     split1:addChild(ui.frame.new("Reactor 3", _, 0xbf8d04))
-split2 = ui.splitLayout.new("split2", "vertical")
+local split2 = ui.splitLayout.new("split2", "vertical")
     reactor4 = ui.linearLayout.new("R4")
     pb_r4 = ui.progressBar.new(_, 0, 100, 0x04bf52)
         reactor4:addChild(ui.space.new())
@@ -34,32 +34,31 @@ split2 = ui.splitLayout.new("split2", "vertical")
     split2:addChild(ui.frame.new("Reactor 5"))
     split2:addChild(ui.frame.new("Reactor 6", _, 0xAA336A))
 
-root = ui.splitLayout.new("root", "horizontal", 1)
+local root = ui.splitLayout.new("root", "horizontal", 1)
     root:addChild(split1)
     root:addChild(split2)
     root:setX(1)
     root:setY(1)
     root:setWidth(w)
     root:setHeight(h)
-    root:draw()
 
-reactor1:setTouchReturnEvent("reactor_event")
+local _screen = ui.screen.new(root)
+_screen:init()
+
 reactor4:setTouchReturnEvent("reactor_event")
 
-function reactor_echo(...)
-    local name, _, x, y = ...
-    print(string.format("Received reactor event from %s %s", x, y))
-end
-
-event.listen("reactor_event", reactor_echo)
-event.listen("touch", function(name, address, x, y, player)
-    root:handleEvent(name, address, x, y, player)
-end)
+term.clear()
 
 while true do
-    local name = event.pull(0.1)
+    local name = event.pull(0.5)
     if name == "interrupted" then break end 
+    if name == "reactor_event" then print("Reactor event detected!") end
+    --if name == "touch" then print("wtf wtf") end
+
+    _screen:draw()
 end
+
+_screen:clean()
 
 --os.sleep(20)
 
