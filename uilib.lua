@@ -49,7 +49,6 @@ function fwrite(x, y, _text, fg, bg, TRE) --TRE = touch return event
 
 end
 
-<<<<<<< HEAD
 --- Represents a generic UI element.
 --- @class baseElement
 --- @field id string|nil The ID of the element
@@ -66,19 +65,12 @@ baseElement.__index = baseElement
 --- Creates a new base UI element.
 --- @param id string Element ID
 --- @return baseElement
-=======
---baseElement class - abstract, has basic fields
-baseElement = {id, x=1, y=1, w=1, h=1, fg, bg, TRE}
-baseElement.__index = baseElement
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function baseElement.new(id)
     local obj = setmetatable({}, baseElement)
     obj.id = id
     return obj
 end
 
-<<<<<<< HEAD
 --- Sets the X coordinate.
 --- @param x number
 function baseElement:setX(x)
@@ -123,26 +115,6 @@ function baseElement:getBackground() return self.bg end
 function baseElement:getId() return self.id end
 
 --- Handles events + Touch Return Event logic
-=======
-function baseElement:setX(x)
-    self.x = x
-end
-function baseElement:setY(y) self.y = y end
-function baseElement:setWidth(w) self.w = w end
-function baseElement:setHeight(h) self.h = h end
-function baseElement:setForeground(fg) self.fg = fg end
-function baseElement:setBackground(bg) self.bg = bg end
-
-function baseElement:getX() return self.x end
-function baseElement:getY() return self.y end
-function baseElement:getWidth() return self.w end
-function baseElement:getHeight() return self.h end
-function baseElement:getForeground() return self.fg end
-function baseElement:getBackground() return self.bg end
-function baseElement:getId() return self.id end
-
---doesnt do anything by default, needs to be overriden
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function baseElement:handleEvent(...)
     local name, _, x, y = ...
     if name == "touch" and type(self.TRE) == "string" then
@@ -150,39 +122,28 @@ function baseElement:handleEvent(...)
     end
 end
 
-<<<<<<< HEAD
 --- Checks if x, y are in the box of the element
 --- @param x number
 --- @param y number
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function baseElement:collide(x, y)
     return x >= self.x and x <= self.x + self.w - 1 and
         y >= self.y and y <= self.y + self.h - 1
 end
-<<<<<<< HEAD
 --- Sets the Touch Return Event
 --- @param name string
-=======
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function baseElement:setTouchReturnEvent(name)
     if type(name) == "string" then
         self.TRE = name
     end
 end
 
-<<<<<<< HEAD
 --- Gets the minimum height required to draw the object
 --- @param w number Width constraint
 --- @return number Height
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function baseElement:measureHeight(w)
     return self.h
 end
 
-<<<<<<< HEAD
 --- A UI element that can contain children.
 --- @class containerElement : baseElement
 --- @field children List of child elements
@@ -191,12 +152,6 @@ containerElement.__index = containerElement
 
 --- Creates a new container UI element
 --- @param id string
-=======
---container element class - baseElement with childrens table
-containerElement = setmetatable({}, baseElement)
-containerElement.__index = containerElement
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement.new(id)
     local obj = setmetatable({}, containerElement)
     obj.id = id
@@ -205,20 +160,14 @@ function containerElement.new(id)
     return obj
 end
 
-<<<<<<< HEAD
 --- Adds a child to the container
 --- @param table Child to add
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:addChild(child)
     table.insert(self.children, child)
 end
 
-<<<<<<< HEAD
 --- Removes a child from the container
 --- @param table Child to remove
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:removeChild(id)
     for i, child in ipairs(self.children) do
         if child.id == id then 
@@ -228,41 +177,29 @@ function containerElement:removeChild(id)
     end
 end
 
-<<<<<<< HEAD
 --- Finds a child in the container
 --- @param table Child to findChild
 --- @return child table child if found
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:findChild(id)
     for i, child in ipairs(self.children) do
         if child.id == id then return child end
     end
 end
 
-<<<<<<< HEAD
 --- Returns a table with all children
 --- @return children table Children table
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:getChildren()
     return self.children
 end
 
-<<<<<<< HEAD
 --- Clears all children from the children table
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:clearChildren()
     for i, child in ipairs(self.children) do
         self.children[i] = nil
     end
 end
 
-<<<<<<< HEAD
 --- Propagates an event to its children
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:propagateEvent(...)
     local name, _, x, y = ...
     if name == "touch" then
@@ -274,10 +211,7 @@ function containerElement:propagateEvent(...)
     end
 end
 
-<<<<<<< HEAD
 --- Handles an event by calling propagateEvent, also checks for touch return event
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function containerElement:handleEvent(...)
     local name, _, x, y = ...
     if name == "touch" and type(self.TRE) == "string" then
@@ -286,7 +220,6 @@ function containerElement:handleEvent(...)
     self:propagateEvent(...)
 end
 
-<<<<<<< HEAD
 --- Represents an UI linear layout (elements are drawn linearly next to eatchother)
 --- @class linearLayout : containerElement
 linearLayout = setmetatable({}, containerElement)
@@ -296,12 +229,6 @@ linearLayout.__index = linearLayout
 --- @param id string
 --- @param gap number Gap between elements, default 0
 --- @return linearLayout
-=======
-linearLayout = setmetatable({}, containerElement)
-linearLayout.__index = linearLayout
-
---layout drawn without splitting children, only supports vertical layout bc why would you need a horizontal one
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function linearLayout.new(id, gap)
     local gap = gap or 0
     local obj = containerElement.new(id)
@@ -312,7 +239,6 @@ function linearLayout.new(id, gap)
     return obj
 end
 
-<<<<<<< HEAD
 --- Returns the gap
 --- @return number
 function linearLayout:getGap() return self.gap end
@@ -321,11 +247,6 @@ function linearLayout:getGap() return self.gap end
 function linearLayout:setGap(gap) self.gap = gap end 
 
 --- Draws the linear layout element onto the screen, position and size have to be set before
-=======
-function linearLayout:getGap() return self.gap end
-function linearLayout:setGap(gap) self.gap = gap end 
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function linearLayout:draw()
     local count = #self.children
     if count == 0 then return end
@@ -360,12 +281,9 @@ function linearLayout:draw()
     end
 end
 
-<<<<<<< HEAD
 --- Gets the minimum height required to draw the object
 --- @param w number Width constraint
 --- @return number Height
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function linearLayout:measureHeight(w)
     local count = #self.children
     if count == 0 then return 0 end
@@ -378,7 +296,6 @@ function linearLayout:measureHeight(w)
     return totalHeight
 end
 
-<<<<<<< HEAD
 --- Represents an UI split layout (eatch element gets an equal amount of space)
 --- @class splitLayout : containerElement
 splitLayout = setmetatable({}, containerElement)
@@ -389,12 +306,6 @@ splitLayout.__index = splitLayout
 --- @param mode string Mode can be "vertical" or "horizontal"
 --- @param gap number Gap between elements, default 0
 --- @return splitLayout
-=======
-splitLayout = setmetatable({}, containerElement)
-splitLayout.__index = splitLayout
-
---split layout, splits space equally to all children, mode is "vertical" or "horizontal"
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function splitLayout.new(id, mode, gap)
     local gap = gap or 0
     local obj = containerElement.new(id)
@@ -409,7 +320,6 @@ function splitLayout.new(id, mode, gap)
     return obj
 end
 
-<<<<<<< HEAD
 --- Returns the gap
 --- @return Gap
 function splitLayout:getGap() return self.gap end
@@ -424,13 +334,6 @@ function splitLayout:getMode() return self.mode end
 function splitLayout:setMode(mode) self.mode = mode end
 
 --- Draws the split layout element onto the screen, position and size have to be set before
-=======
-function splitLayout:getGap() return self.gap end
-function splitLayout:setGap(gap) self.gap = gap end
-function splitLayout:getMode() return self.mode end
-function splitLayout:setMode(mode) self.mode = mode end
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function splitLayout:draw()
     --parameters
     local count = #self.children
@@ -494,24 +397,16 @@ function splitLayout:draw()
     end
 end
 
-<<<<<<< HEAD
 --- Abstract class to hold only one element
 --- @class singleElementContainer : baseElement
 --- @field base table Its base
-=======
---abstract class to hold only one element
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 singleElementContainer = setmetatable({}, baseElement)
 singleElementContainer.__index = singleElementContainer
 
 singleElementContainer.base = nil
 
-<<<<<<< HEAD
 --- Sets the base of the container
 --- @param base table Another element
-=======
--- :P
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:setBase(base) 
     if type(base) ~= "table" then return end
     if not self.id and type(base.id) == "string" then
@@ -519,7 +414,6 @@ function singleElementContainer:setBase(base)
     end
     self.base = base
 end
-<<<<<<< HEAD
 
 --- Removes the base of the container if it has one
 function singleElementContainer:removeBase()
@@ -531,80 +425,55 @@ end
 function singleElementContainer:getBase() return self.base end
 
 --- Handles and event by sending it to the base
-=======
-function singleElementContainer:removeBase()
-    self.base = nil
-end
-function singleElementContainer:getBase() return self.base end
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:handleEvent(...)
     local _, _, x, y = ...
     if self.base then
         if self.base:collide(x, y) then self.base:handleEvent(...) end
     end
 end
-<<<<<<< HEAD
 
 --- Checks if the base is a container (has a children table)
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:isBaseContainer()
     if not self.base then return false end
     if not self.base.children then return false end
     return true
 end
-<<<<<<< HEAD
 
 --- Adds a child to the base if the base is a container, if not throws error
 --- @param child table
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:addChild(child)
     if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
     self.base:addChild(child)
 end
-<<<<<<< HEAD
 
 --- Removes a child by id from the base if the base is a container, if not throws error
 --- @param id string
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:removeChild(id)
     if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
     self.base:removeChild(id)
 end
-<<<<<<< HEAD
 
 --- Find a child by id from the base if the base is a container, if not throws error
 --- @param id string
 --- @return child
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:findChild(id)
     if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
     return self.base:findChild(id)
 end
-<<<<<<< HEAD
 
 --- Returns the children table if the base is a container, if not throws error
 --- @return children table
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:getChildren()
     if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
     return self.base:getChildren()
 end
-<<<<<<< HEAD
 
 --- Clears the children table if the base is a container, if not throws error
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function singleElementContainer:clearChildren()
     if not self:isBaseContainer() then print_error(string.format("Container %s's base is not a container!", self.id)) end
     self.base:clearChildren()
 end
 
-<<<<<<< HEAD
 --- Single element container to draw a nice frame around an object
 --- @class frame : singleElementContainer
 frame = setmetatable({}, singleElementContainer)
@@ -616,16 +485,6 @@ frame.__index = frame
 --- @param fg number Foreground color (hex)
 --- @param bg number Background color (hex)
 --- @return frame
-=======
---SEC doesnt get a measureHeight override but the classes that derive from it should have one
---not always tho for example frame also doent need one
-
-frame = setmetatable({}, singleElementContainer)
-frame.__index = frame
-
---object that holds a base, draws a frame around it and them draws the base
---you need to create the base by yourself and give it to the frame by setBase or by the constructor
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function frame.new(id, base, fg, bg)
     local fg = fg or gpu.getForeground()
     local bg = bg or gpu.getBackground()
@@ -639,10 +498,7 @@ function frame.new(id, base, fg, bg)
     return obj
 end
 
-<<<<<<< HEAD
 --- Draws the frame onto the screen, position and size have to be set before
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function frame:draw()
     --base and colors
     local base = self:getBase()
@@ -694,7 +550,6 @@ function frame:draw()
     end
 end
 
-<<<<<<< HEAD
 --- UI element that draws text to the screen and wrapps its around the width
 --- @class label : baseElement
 label = setmetatable({}, baseElement)
@@ -707,13 +562,6 @@ label.__index = label
 --- @param fg number Foreground color (hex)
 --- @param bg number Background color (hex)
 --- @return label
-=======
-label = setmetatable({}, baseElement)
-label.__index = label
-
---should only be used in linear layout
--- to do: add a textChanged flag so that i dont recalculate wrappedText everytime
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function label.new(id, _text, centered, fg, bg)
     local obj = setmetatable({}, label)
     obj.id = id or nil
@@ -728,26 +576,17 @@ function label.new(id, _text, centered, fg, bg)
     return obj
 end
 
-<<<<<<< HEAD
 --- Sets the text of the label
 --- @param _text string
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function label:setText(_text) 
     self._text = _text 
     self.textChanged = true
 end
-<<<<<<< HEAD
 
 --- Returs the text of the label
 --- @return string
 function label:getText() return self._text end
 
-=======
-function label:getText() return self._text end
-
---width needs to be set first
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 --this shouldnt be use anymore because i added measureHeight logic
 --function label:getHeight()
 --    local width = self:getWidth()
@@ -759,12 +598,9 @@ function label:getText() return self._text end
 --    return self.h
 --end
 
-<<<<<<< HEAD
 --- Gets the minimum height required to draw the text wrapped into the width
 --- @param w number Width
 --- @return number
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function label:measureHeight(w)
     if self.textChanged then
         self.wrappedText = stru.tableWrap(self._text, w) --recalculate wrappedText bc maybe the text changes since last time
@@ -773,10 +609,7 @@ function label:measureHeight(w)
     return #self.wrappedText
 end
 
-<<<<<<< HEAD
 --- Draws the width, measureHeight has to be called before to create wrappedText
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function label:draw()
     --colors
     local fg = self:getForeground()
@@ -797,7 +630,6 @@ function label:draw()
     end
 end
 
-<<<<<<< HEAD
 --- UI element that just adds an empty space, doesnt draw it just skips the license
 --- @class space : baseElement
 space = setmetatable({}, baseElement)
@@ -807,11 +639,6 @@ space.__index = space
 --- @param id string 
 --- @param height number Height, how many lines to skip
 --- @return space
-=======
-space = setmetatable({}, baseElement)
-space.__index = space
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function space.new(id, height)
     local obj = setmetatable({}, space)
     obj.id = id or nil
@@ -820,15 +647,11 @@ function space.new(id, height)
     return obj
 end
 
-<<<<<<< HEAD
 --- Draws the space, doesnt actually do anything :)
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function space:draw()
     --the function doesnt do anything :))
 end
 
-<<<<<<< HEAD
 --- UI element that draws a working progress bar, the value has to be set manually
 --- @class progressBar : baseElement
 --- @field min number Minimum value
@@ -844,11 +667,6 @@ progressBar.__index = progressBar
 --- @param fg number Foreground color (hex)
 --- @param bg number Background color (hex), by default 0x505050
 --- @return progressBar
-=======
-progressBar = setmetatable({}, baseElement)
-progressBar.__index = progressBar
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function progressBar.new(id, min, max, fg, bg)
     local obj = setmetatable({}, progressBar)
     obj.id = id
@@ -861,7 +679,6 @@ function progressBar.new(id, min, max, fg, bg)
     return obj
 end
 
-<<<<<<< HEAD
 --- Sets the minimum
 --- @param min number Minimum value
 function progressBar:setMin(min) self.min = min end
@@ -880,12 +697,6 @@ function progressBar:getMax() return self.max end
 
 --- Sets the value, throws error if value is out of bounds (may not a good idea whatever)
 --- @param min number The value the progress bar is at
-=======
-function progressBar:setMin(min) self.min = min end
-function progressBar:getMin() return self.min end
-function progressBar:setMax(max) self.max = max end
-function progressBar:getMax() return self.max end
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function progressBar:setValue(value) 
     if value >= self.min and value <= self.max then
         self.value = value 
@@ -893,7 +704,6 @@ function progressBar:setValue(value)
         print_error(string.format("Value at progress bar %s is out of bounds", self.id))
     end
 end
-<<<<<<< HEAD
 
 --- Returns the value
 --- @return number
@@ -901,18 +711,12 @@ function progressBar:getValue() return self.value end
 
 --- Increments the value by i, not recommended
 --- @param i number how much to increment
-=======
-function progressBar:getValue() return self.value end
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function progressBar:incrementValue(i) 
     local i = i or 1
     self:setValue(self.value + i)
 end
 
-<<<<<<< HEAD
 --- Draws the progress bar onto the screen
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function progressBar:draw()
     --colors
     local fg = self:getForeground() --here fg is full block color
@@ -938,7 +742,6 @@ function progressBar:draw()
     end
 end
 
-<<<<<<< HEAD
 --- Container that takes an element and adds horizontal space You need to specify a root object
 --- @field spacing number The space to add
 hSpacer = setmetatable({}, singleElementContainer)
@@ -948,12 +751,6 @@ hSpacer.__index = hSpacer
 --- @field id string
 --- @field spacing number Spacing to add
 --- @field base table Element to add space to
-=======
-hSpacer = setmetatable({}, singleElementContainer)
-hSpacer.__index = hSpacer
-
---class that adds horizontal space to an object
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function hSpacer.new(id, spacing, base)
     local fg = fg or gpu.getForeground()
     local bg = bg or gpu.getBackground()
@@ -969,7 +766,6 @@ function hSpacer.new(id, spacing, base)
     return obj
 end
 
-<<<<<<< HEAD
 --- Sets the spacing
 --- @param value number Spacing
 function hSpacer:setSpacing(value) self.spacing = value end
@@ -979,11 +775,6 @@ function hSpacer:setSpacing(value) self.spacing = value end
 function hSpacer:getSpacing() return self.spacing end
 
 --- Draws the base with horizontal space
-=======
-function hSpacer:setSpacing(value) self.spacing = value end
-function hSpacer:getSpacing() return self.spacing end
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function hSpacer:draw()
     --base and colors
     local base = self:getBase()
@@ -1011,17 +802,13 @@ function hSpacer:draw()
     end
 end
 
-<<<<<<< HEAD
 --- Gets the minimum height required to draw the text wrapped into the width
 --- @param w number Width
 --- @return number
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function hSpacer:measureHeight(w)
     return self.base:measureHeight(w)
 end
 
-<<<<<<< HEAD
 --- Button UI element, if pressed will send the Touch Return Event in the event queue (tbe not in the constructor)
 --- @class button : label
 button = setmetatable({}, label)
@@ -1035,12 +822,6 @@ button.__index = button
 --- @param _event string The touch return event, if you press the button this event will be pushed into the event queue
 --- @param textColor number Color of the text (hex value)
 --- @param buttonColor number Color of the button (hex value)
-=======
-button = setmetatable({}, label)
-button.__index = button
-
---when you press the button a touch return event that you specify will be pushed into the queue
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function button.new(id, h, _text, centered, _event, textColor, buttonColor)
     if centered == nil then centered = true end
 
@@ -1057,12 +838,9 @@ function button.new(id, h, _text, centered, _event, textColor, buttonColor)
     return obj
 end
 
-<<<<<<< HEAD
 --- Gets the minimum height required to draw the text wrapped into the width
 --- @param w number Width
 --- @return number
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function button:measureHeight(w)
     local h = self.h
     if self.textChanged then
@@ -1074,10 +852,7 @@ function button:measureHeight(w)
     return h
 end
 
-<<<<<<< HEAD
 --- Draws the button
-=======
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 function button:draw()
     --colors
     local fg = self:getForeground()
@@ -1105,7 +880,6 @@ function button:draw()
     for i = y, y + botEmpty - 1 do fwrite(x, i, string.rep(" ", w), fg, bg) end
 end
 
-<<<<<<< HEAD
 --- A wrapper class to simplify the root drawing process
 --- @class screen
 --- @field root table The root of the screen
@@ -1139,25 +913,12 @@ end
 function screen:init()
     if not self.root then print_error("You need to specify a root object") end
 
-=======
-local local_root = nil
-
-function rootEventWrapper(...)
-    root:handleEvent(...)
-end
-
-function screenInit(root)
-    if not root then print_error("You need to specify a root object") end
-
-    local_root = root
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
     local w, h = gpu.getResolution()
     root:setX(1)
     root:setY(1)
     root:setWidth(w)
     root:setHeight(h)
 
-<<<<<<< HEAD
     self.touchHandler = self:functionWrapper()
     event.listen("touch", self.touchHandler)
 end
@@ -1175,21 +936,6 @@ function screen:draw()
 end
 
 --- LIB ---
-=======
-    event.listen("touch", rootEventWrapper)
-end
-
-function screenClean()
-    term.clear()
-    event.ignore("touch", rootEventWrapper)
-    rootEventWrapper = function() return false end
-end
-
-function screenDraw()
-    root:draw()
-end
-
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
 return {
     fwrite = fwrite,
     baseElement = baseElement,
@@ -1203,12 +949,5 @@ return {
     progressBar = progressBar,
     hSpacer = hSpacer,
     button = button,
-<<<<<<< HEAD
     screen = screen,
 }
-=======
-    screenInit = screenInit,
-    screenClean = screenClean,
-    screenDraw = screenDraw,
-}
->>>>>>> 6b5f860f9e18993e80e3918816bd41f50a16b961
