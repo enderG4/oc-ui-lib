@@ -3,6 +3,8 @@ local gpu = component.gpu
 local term = require("term")
 local sides = require("sides")
 
+--- !! Not a good example, ignore this file
+
 package.loaded["uilib"] = nil
 local ui = require("uilib")
 local event = require("event")
